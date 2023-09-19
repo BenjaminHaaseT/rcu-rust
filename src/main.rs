@@ -147,9 +147,16 @@ fn main() {
                     counter.fetch_add(1, Relaxed);
                 }
             });
+            s.spawn(move || {
+                let subscriber = rcu.subscribe();
+                let data = subscriber.read();
+                println!("data read from subscriber {i}");
+            });
         }
     });
     while counter.load(Relaxed) < 2000 {
         std::hint::spin_loop();
     }
+    let results = rcu.read();
+    println!("final results: {:?}", results);
 }
